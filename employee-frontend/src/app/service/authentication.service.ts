@@ -1,17 +1,21 @@
 import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { JwtHelperService } from '@auth0/angular-jwt';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 import { User } from '../model/user';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
+
   private host: string =  environment.apiUrl;
   private token: any;
   private loggedInUsername: any;
-
+  private isTokenExpired: boolean = false;
+  private jwtHelper = new JwtHelperService();
 
   constructor(private http: HttpClient) { }
 
@@ -52,10 +56,23 @@ public getTokenFromLocalStorage(): string{
   return this.token;
 }
 
-//  implementation of jwt using installed dependency
+//  implementation of jwt using installed dependency on video 107 on 3mins
 
+public isLoggedIn(): boolean{
+  this.loadTokenFromLocalStorage();
+  if(this.token != null && this.token !==""){
+    if(this.jwtHelper.decodeToken(this.token).sub != null || ""){
+      if(!this.jwtHelper.isTokenExpired(this.token)){
+        this.loggedInUsername = this.jwtHelper.decodeToken(this.token).sub;
+        this.isTokenExpired = true;
+      }
+    }
 
-
-
+  }else{
+    this.logout();
+    this.isTokenExpired =  false;
+  }
+  return this.isTokenExpired;
+}
 
 }
