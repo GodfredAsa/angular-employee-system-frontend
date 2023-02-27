@@ -11,7 +11,7 @@ import { User } from '../model/user';
 })
 export class AuthenticationService {
 
-  private host: string =  environment.apiUrl;
+  public host: string =  environment.apiUrl;
   private token: string;
   private loggedInUsername: string;
   private isTokenExpired: boolean;
