@@ -12,9 +12,9 @@ import { User } from '../model/user';
 export class AuthenticationService {
 
   private host: string =  environment.apiUrl;
-  private token: any;
-  private loggedInUsername: any;
-  private isTokenExpired: boolean = false;
+  private token: string;
+  private loggedInUsername: string;
+  private isTokenExpired: boolean;
   private jwtHelper = new JwtHelperService();
 
   constructor(private http: HttpClient) { }
@@ -45,7 +45,7 @@ export class AuthenticationService {
   }
 
   public getUserFromLocalStorage(): User {
-    return JSON.parse(localStorage.getItem('user') || '{}');
+    return JSON.parse(localStorage.getItem('user'));
   }
 
 public loadTokenFromLocalStorage(): void{
