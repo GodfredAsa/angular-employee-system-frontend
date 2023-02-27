@@ -58,7 +58,7 @@ public getTokenFromLocalStorage(): string{
 
 //  implementation of jwt using installed dependency on video 107 on 3mins
 
-public isLoggedIn(): boolean{
+public isUserLoggedIn(): boolean{
   this.loadTokenFromLocalStorage();
   if(this.token != null && this.token !==""){
     if(this.jwtHelper.decodeToken(this.token).sub != null || ""){
