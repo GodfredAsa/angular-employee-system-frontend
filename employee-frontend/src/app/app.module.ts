@@ -1,3 +1,4 @@
+import { NotificationModule } from './notification.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http'
@@ -7,6 +8,8 @@ import { AuthenticationService } from './service/authentication.service';
 import { UserService } from './service/user.service';
 import { AuthInterceptor } from './interceptor/auth.interceptor';
 import { AuthenenticationGuard } from './guard/authenentication.guard';
+import { NotificationService } from './service/notification.service';
+
 
 @NgModule({
   declarations: [
@@ -15,12 +18,14 @@ import { AuthenenticationGuard } from './guard/authenentication.guard';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    NotificationModule,
   ],
   providers: [
     AuthenticationService,
     UserService,
     AuthenenticationGuard,
+    NotificationService,
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}
   ],
   bootstrap: [AppComponent]
