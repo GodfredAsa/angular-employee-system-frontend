@@ -1,9 +1,6 @@
 export enum NotificationMessage{
-  LOGIN_SUCCESS= 'default',
-  NOT_AUTHENTICATED = 'success',
-  ERROR = 'error',
-  INFO = 'info',
-  WARNING = 'warning',
+  DEFAULT_ERROR = "An Error Occurred, Please Try Again",
+  LOGIN_SUCCESS = "You have successfully logged In",
 }
 
 // TODO WILL WORK ON THIS MESSSAGE ONCE AM DONE WITH THE CLIENT DEVELOPMENT.
