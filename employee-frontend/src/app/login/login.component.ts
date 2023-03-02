@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthenticationService } from '../service/authentication.service';
 import { Subscription } from 'rxjs';
-import { NotificationType } from '../enum/notification-type.enum';
 import { HeaderType } from '../enum/header-type.enum';
 import { ToastrService } from 'ngx-toastr';
 
@@ -18,7 +17,6 @@ import { ToastrService } from 'ngx-toastr';
 export class LoginComponent implements OnInit, OnDestroy {
   public showLoading: boolean;
   private subscriptions: Subscription[] = []
-  private notificationService: NotificationService;
 
   constructor(private router: Router, private authenticationService: AuthenticationService, private toastr: ToastrService) { }
 
