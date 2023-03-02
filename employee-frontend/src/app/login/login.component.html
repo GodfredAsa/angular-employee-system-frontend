@@ -1,0 +1,63 @@
+<div class="container login-container">
+  <div class="container">
+    <h3 class="text-center m-3">Employee Management <br> Portal </h3>
+  </div>
+
+  <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm.value)">
+    <span class="small  password-hint" *ngIf="usernameInput.invalid && usernameInput.touched">Please Enter username</span>
+    <div class="input-group mb-3">
+      <span class="input-group-text fa-icons" id="basic-addon1"><i class="fa fa-user "></i></span>
+      <input type="text" class="form-control" placeholder="username" aria-label="Username" name="username"
+        aria-describedby="basic-addon1" required ngModel #usernameInput="ngModel">
+    </div>
+
+    <span class="small username-hint" *ngIf="passwordInput.invalid && passwordInput.touched">Please Enter password</span>
+    <div class="input-group mb-3">
+      <span class="input-group-text fa-icons" id="basic-addon1"><i class="fa fa-key"></i></span>
+      <input type="password" name="password" class="form-control" placeholder="password" aria-label="password"
+        aria-describedby="basic-addon1" required ngModel #passwordInput="ngModel">
+    </div>
+
+
+    <div class="input-group mb-3">
+      <button class="btn w-100 login-btn"  type="submit" name="button" [disabled]= "loginForm.invalid || showLoading">
+        <i *ngIf="showLoading" class="fa fa-spinner fa-spin"></i> &nbsp; &nbsp;
+        <span *ngIf="showLoading">Loading... </span>
+        <span *ngIf="!showLoading" >Login</span>
+      </button>
+    </div>
+
+  </form>
+
+  <div class="text-center mb-3 small">
+    <span class="text-center ">Don't have an account? <a href="" class="sign-up">Sign up</a></span>
+  </div>
+
+  <!-- <div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
+    <span class="input-group-text" id="basic-addon2">@example.com</span>
+  </div> -->
+
+  <!-- <label for="basic-url" class="form-label">Your vanity URL</label>
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="basic-addon3">https://example.com/users/</span>
+    <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+  </div> -->
+
+  <!-- <div class="input-group mb-3">
+    <span class="input-group-text">$</span>
+    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
+    <span class="input-group-text">.00</span>
+  </div> -->
+
+  <!-- <div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Username" aria-label="Username">
+    <span class="input-group-text">@</span>
+    <input type="text" class="form-control" placeholder="Server" aria-label="Server">
+  </div>
+
+  <div class="input-group">
+    <span class="input-group-text">With textarea</span>
+    <textarea class="form-control" aria-label="With textarea"></textarea>
+  </div> -->
+</div>
