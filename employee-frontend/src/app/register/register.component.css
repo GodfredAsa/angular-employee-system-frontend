@@ -1,0 +1,36 @@
+
+
+.login-container{
+
+  border-radius: 5px;
+  margin: 10% auto;
+  padding: 10px 30px;
+  width: 50%;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px;
+
+}
+.sign-up{
+  text-decoration: none;
+}
+
+.login-btn{
+  background-color: #567189;
+  border: none;
+  color: white;
+  letter-spacing: 1px;
+}
+
+
+.username-hint, .password-hint{
+  color: red;
+  font-size: 10px;
+  margin: 0px
+
+}
+
+.fa-icons{
+  background-color: #567189;
+  color: white;
+  border: none;
+
+}
