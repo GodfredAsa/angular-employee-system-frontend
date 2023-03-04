@@ -59,12 +59,12 @@ export class UserService {
   public createUserFormData(loggedInUsername: string, user: User, profileImage: File): FormData{
     const formData = new FormData();
     formData.append('currentUsername', loggedInUsername);
-    formData.append('firstName', user.firstNamee);
+    formData.append('firstName', user.firstName);
     formData.append('lastName', user.lastName);
     formData.append('email', user.email);
     formData.append('username', user.username);
     formData.append('role', user.role);
-    formData.append('isActive', JSON.stringify(user.active));
+    formData.append('active', JSON.stringify(user.active));
     formData.append('isNonLocked', JSON.stringify(user.notLocked));
     formData.append('profileImage', profileImage);
     return formData;

@@ -30,7 +30,7 @@ export class RegisterComponent implements OnInit, OnDestroy{
       this.subscriptions.push(
         this.authenticationService.register(user).subscribe(
           (response: User) => {
-              this.sendNotification(`${NotificationMessage.REGISTRATION_SUCCESS}. Check ${response.email} for password`)
+              this.toastr.success(`${NotificationMessage.REGISTRATION_SUCCESS}. Check ${response.email} for password`)
               this.router.navigateByUrl('/login')
               this.showLoading = false;
           },
@@ -40,14 +40,6 @@ export class RegisterComponent implements OnInit, OnDestroy{
                   }
         ))
     }
-
-  private sendNotification(message: string): void {
-    if (message) {
-        this.toastr.success(message);
-    } else {
-      this.toastr.error(NotificationMessage.DEFAULT_ERROR)
-    }
-  }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
