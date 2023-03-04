@@ -1,7 +1,6 @@
 import { NotificationMessage } from './../enum/notification-message.enum';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { User } from '../model/user';
-import { NotificationService } from '../service/notification.service';
 import { Router } from '@angular/router';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthenticationService } from '../service/authentication.service';
