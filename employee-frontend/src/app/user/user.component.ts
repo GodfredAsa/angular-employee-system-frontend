@@ -24,6 +24,8 @@ export class UserComponent implements OnInit, OnDestroy{
   public selectedUser: User;
   public fileName: string;
   public profileImage: File;
+  public editUser = new User();
+  private currentUsername: string;
 
   constructor(private userService: UserService, private toastr: ToastrService){}
 
@@ -45,7 +47,6 @@ export class UserComponent implements OnInit, OnDestroy{
           this.refreshing = false;
           if(showNotification){
             this.toastr.success(`${response.length} user(s) loaded`)
-            console.log(this.users)
           }
         },
         (errorResponse: HttpErrorResponse) => {
@@ -107,6 +108,36 @@ export class UserComponent implements OnInit, OnDestroy{
       this.users = this.userService.getUsersFromLocalStorage()
     }
   }
+
+  public onEditUser(selectedUser: User): void{
+    this.editUser = selectedUser;
+    this.currentUsername = selectedUser.username;
+    this.clickButtonById("openUserEdit");
+    console.log(selectedUser)
+
+  }
+
+  public onUpdateUser(): void{
+     // save the form data;
+     const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage);
+     // makes an http call so we need to subscribe to it
+     this.subscriptions.push(
+     this.userService.updateUser(formData).subscribe(
+      ( response: User) => {
+       this.clickButtonById("closeEditUserModalButton")
+       this.getUsers(false);
+       // removing all data in the forms
+       this.fileName = null;
+       this.profileImage = null;
+       this.toastr.success(`${response.firstName} updated Successfull Added`);
+      },
+      (errorResponse: HttpErrorResponse) => {
+       this.toastr.error(errorResponse.error.message);
+       this.profileImage = null;
+      }))
+
+  }
+
 
   private clickButtonById(buttonId: string): void {
     document.getElementById(buttonId).click()
