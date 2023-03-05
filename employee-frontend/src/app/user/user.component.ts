@@ -1,3 +1,4 @@
+import { CustomHttpResponse } from './../model/custom-http-resonse';
 import { NotificationMessage } from './../enum/notification-message.enum';
 import { NotificationType } from './../enum/notification-type.enum';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -99,7 +100,7 @@ export class UserComponent implements OnInit, OnDestroy{
           user.lastName.toLowerCase().indexOf(seacrhName.toLowerCase())     !== -1 ||
           user.email.toLowerCase().indexOf(seacrhName.toLowerCase())        !== -1 ||
           user.username.toLowerCase().indexOf(seacrhName.toLowerCase())     !== -1 ||
-          user.userId.toLowerCase().indexOf(seacrhName.toLowerCase())       !== -1 ){
+          user.userId.toString().toLowerCase().indexOf(seacrhName.toLowerCase())       !== -1 ){
             searchedUsers.push(user)
       }
     }
@@ -113,7 +114,6 @@ export class UserComponent implements OnInit, OnDestroy{
     this.editUser = selectedUser;
     this.currentUsername = selectedUser.username;
     this.clickButtonById("openUserEdit");
-    console.log(selectedUser)
 
   }
 
@@ -135,9 +135,19 @@ export class UserComponent implements OnInit, OnDestroy{
        this.toastr.error(errorResponse.error.message);
        this.profileImage = null;
       }))
-
   }
 
+  public onDeleteUser(user: User): void{
+    this.subscriptions.push(
+      this.userService.deleteUser(user.username).subscribe(
+        (response: CustomHttpResponse) => {
+          this.toastr.success(response.message);
+          this.getUsers(true)
+        },
+        (errorResponse: HttpErrorResponse) =>{
+          this.toastr.error(errorResponse.error.message)
+        }))
+  }
 
   private clickButtonById(buttonId: string): void {
     document.getElementById(buttonId).click()
