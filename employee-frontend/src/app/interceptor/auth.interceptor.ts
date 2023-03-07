@@ -29,9 +29,11 @@ export class AuthInterceptor implements HttpInterceptor {
   if(httpRequest.url.includes(`${this.authenticationService.host}/user/register`)){
     return HttpHandler.handle(httpRequest)
   }
-  if(httpRequest.url.includes(`${this.authenticationService.host}/user/resetpassword`)){
-    return HttpHandler.handle(httpRequest)
-  }
+
+  // COMMENTED THIS OUT BCOS IT REQUIRES AUTHENTICATION
+  // if(httpRequest.url.includes(`${this.authenticationService.host}/user/resetpassword`)){
+  //   return HttpHandler.handle(httpRequest)
+  // }
 
   // getting the token from the local storage if the user has logged in before
   this.authenticationService.loadTokenFromLocalStorage();

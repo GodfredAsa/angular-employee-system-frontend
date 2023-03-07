@@ -52,6 +52,7 @@ public loadTokenFromLocalStorage(): void{
    this.token = localStorage.getItem('token')
 }
 
+
 public getTokenFromLocalStorage(): string{
   return this.token;
 }
