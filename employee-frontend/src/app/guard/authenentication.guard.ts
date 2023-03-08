@@ -10,9 +10,7 @@ import { NotificationService } from '../service/notification.service';
 export class AuthenenticationGuard implements CanActivate {
   private isAuthenticated: boolean = false;
 
-  constructor(private authenticationService: AuthenticationService,
-              private router: Router,
-              private notificationService: NotificationService) {}
+  constructor(private authenticationService: AuthenticationService, private router: Router) {}
 
   canActivate(
     next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -23,13 +21,14 @@ export class AuthenenticationGuard implements CanActivate {
   private isUserLoggedIn(): boolean{
     if(this.authenticationService.isUserLoggedIn()){
       this.isAuthenticated = true;
-    } this.router.navigate(['/login']);
+      // this.router.navigate(['/user/management'])
+    }
 
+    this.router.navigate(['/login']);
     // TODO send notification
-    this.notificationService.showNotification(NotificationType.ERROR, "You need to log in to access this page".toUpperCase())
+    // this.notificationService.showNotification(NotificationType.ERROR, "You need to log in to access this page".toUpperCase())
 
     return this.isAuthenticated;
-
   }
 
 }

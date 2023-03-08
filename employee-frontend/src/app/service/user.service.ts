@@ -32,7 +32,7 @@ export class UserService {
   }
 
   // this is an event
-  public updateProfileImage(formData: FormData): Observable<HttpEvent<User> | HttpErrorResponse >{
+  public updateProfileImage(formData: FormData): Observable<HttpEvent<User>>{
     return this.http.post<User>(`${this.host}/user/updateProfileImage`,
           formData, {
             reportProgress: true,

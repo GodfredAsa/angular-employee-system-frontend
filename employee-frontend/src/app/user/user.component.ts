@@ -1,14 +1,15 @@
+import { FileUploadStatus } from './../model/file-upload.status';
+import { AuthenticationService } from './../service/authentication.service';
 import { CustomHttpResponse } from './../model/custom-http-resonse';
 import { NotificationMessage } from './../enum/notification-message.enum';
-import { NotificationType } from './../enum/notification-type.enum';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpEventType } from '@angular/common/http';
 import { User } from './../model/user';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { UserService } from '../service/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { NgForm } from '@angular/forms';
-
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user',
@@ -27,11 +28,14 @@ export class UserComponent implements OnInit, OnDestroy{
   public profileImage: File;
   public editUser = new User();
   private currentUsername: string;
+  public loginUser: User;
+  public fileStatus = new FileUploadStatus();
 
-  constructor(private userService: UserService, private toastr: ToastrService){}
+  constructor(private router: Router,private userService: UserService, private toastr: ToastrService, private authenticationService: AuthenticationService){}
 
   ngOnInit(): void {
     this.getUsers(true)
+    this.getLoggedInUser()
   }
 
   public changeTitle(title: string): void{
@@ -61,11 +65,55 @@ export class UserComponent implements OnInit, OnDestroy{
     this.clickButtonById("openUserInfo")
   }
 
-  public onProfileImageChange(event: Event ): void{
+  public onProfileImageChange(event: Event ): File{
     const target = event.target as HTMLInputElement;
       const files = target.files as FileList;
       this.fileName = files[0].name;
-      this.profileImage  = files[0]
+      return this.profileImage  = files[0]
+  }
+
+  public updateprofileImage(): void{
+    this.clickButtonById("profile-image-input")
+
+  }
+//  UPDATE PROFILE CLICK FUNCTION
+  public onUpdateProfileImage(): void{
+    const formData = new FormData()
+    formData.append("username", this.loginUser.username);
+    formData.append("profileImage",  this.profileImage);
+
+    this.subscriptions.push(
+      this.userService.updateProfileImage(formData).subscribe(
+        (event: HttpEvent<any>) => {
+          this.reportImageUploadProgress(event);
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.toastr.error(errorResponse.error.message)
+          this.fileStatus.status = "Done"
+        }))
+  }
+
+  private reportImageUploadProgress(event: HttpEvent<any>): void{
+
+    switch(event.type){
+      case HttpEventType.UploadProgress:
+        this.fileStatus.percent  = Math.round((100 * event.loaded / event.total));
+        this.fileStatus.status = "progress";
+        break;
+
+      case HttpEventType.Response:
+        if(event.status === 200){
+          this.loginUser.profileImageUrl = `${event.body.profileImageUrl}?time=${new Date().getTime()}`;
+          this.toastr.success(`${event.body.firstName} ${NotificationMessage.PROFILE_IMAGE_UPLOAD_SUCCESS}`)
+          this.fileStatus.status = "Done";
+          break;
+        }else{
+          this.toastr.warning(`${NotificationMessage.PROFILE_IMAGE_UPLOAD_FAILURE} Try Again`)
+          break;
+        }
+        default:
+          `Finished All Processes`
+    }
   }
 
   public saveNewUser(): void{
@@ -114,7 +162,11 @@ export class UserComponent implements OnInit, OnDestroy{
     this.editUser = selectedUser;
     this.currentUsername = selectedUser.username;
     this.clickButtonById("openUserEdit");
+  }
 
+  private getLoggedInUser(): User {
+    this.loginUser = this.authenticationService.getUserFromLocalStorage();
+    return this.loginUser;
   }
 
   public onUpdateUser(): void{
@@ -129,12 +181,30 @@ export class UserComponent implements OnInit, OnDestroy{
        // removing all data in the forms
        this.fileName = null;
        this.profileImage = null;
-       this.toastr.success(`${response.firstName} updated Successfull Added`);
+       this.toastr.success(`${response.firstName} updated Successfully Added`);
       },
       (errorResponse: HttpErrorResponse) => {
        this.toastr.error(errorResponse.error.message);
        this.profileImage = null;
       }))
+  }
+
+  public onResetPassword(emailForm: NgForm): void{
+    this.refreshing = true;
+    const emailAddress = emailForm.value['reset-password-email']
+    this.subscriptions.push(
+      this.userService.resetPassword(emailAddress).subscribe(
+        (response: CustomHttpResponse) =>{
+          this.toastr.success(response.message);
+          this.getUsers(false)
+          this.refreshing = false
+        },
+        (errorResponse: HttpErrorResponse) => {
+          this.toastr.warning(errorResponse.error.message);
+          this.refreshing = false
+        },
+        () => emailForm.reset()
+      ))
   }
 
   public onDeleteUser(user: User): void{
@@ -149,9 +219,41 @@ export class UserComponent implements OnInit, OnDestroy{
         }))
   }
 
+  public onLogout(): void{
+    this.authenticationService.logout()
+    this.router.navigateByUrl('/login')
+    this.toastr.success(NotificationMessage.LOGOUT_SUCCESS)
+  }
+
+  public onUpdateCurrentUser(user: User): void{
+   this.currentUsername =  this.authenticationService.getUserFromLocalStorage().username;
+   this.refreshing = true
+     // save the form data;
+     const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage);
+     // makes an http call so we need to subscribe to it
+     this.subscriptions.push(
+     this.userService.updateUser(formData).subscribe(
+      ( response: User) => {
+       this.getUsers(false);
+       // removing all data in the forms
+       this.authenticationService.addUserToLocalStorage(response)
+       this.fileName = null;
+       this.profileImage = null;
+       this.toastr.success(`${response.firstName} updated Successfully Added`);
+       this.refreshing = true
+      },
+      (errorResponse: HttpErrorResponse) => {
+       this.toastr.error(errorResponse.error.message);
+       this.profileImage = null;
+       this.refreshing = false;
+      }))
+
+  }
+
   private clickButtonById(buttonId: string): void {
     document.getElementById(buttonId).click()
   }
+
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
