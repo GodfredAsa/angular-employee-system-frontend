@@ -7,6 +7,7 @@ import { AuthenticationService } from '../service/authentication.service';
 import { Subscription } from 'rxjs';
 import { HeaderType } from '../enum/header-type.enum';
 import { ToastrService } from 'ngx-toastr';
+import { SubSink } from 'subsink';
 
 @Component({
   selector: 'app-login',

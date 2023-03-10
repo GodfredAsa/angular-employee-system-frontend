@@ -1,3 +1,4 @@
+import { Role } from './../enum/role.enum';
 import { FileUploadStatus } from './../model/file-upload.status';
 import { AuthenticationService } from './../service/authentication.service';
 import { CustomHttpResponse } from './../model/custom-http-resonse';
@@ -10,6 +11,7 @@ import { UserService } from '../service/user.service';
 import { ToastrService } from 'ngx-toastr';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { SubSink } from 'subsink';
 
 @Component({
   selector: 'app-user',
@@ -17,6 +19,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./user.component.css']
 })
 export class UserComponent implements OnInit, OnDestroy{
+
+  private subs = new SubSink();
+
 
   private titleSubject = new BehaviorSubject<string>("Users");
   public titleAction$ = this.titleSubject.asObservable();
@@ -44,7 +49,8 @@ export class UserComponent implements OnInit, OnDestroy{
 
   public getUsers(showNotification: boolean): void{
     this.refreshing = true;
-    this.subscriptions.push (
+
+    this.subs.add(
       this.userService.getUsers().subscribe(
         (response: User[]) => {
           this.userService.addUsersToLocalStorage(response);
@@ -82,7 +88,7 @@ export class UserComponent implements OnInit, OnDestroy{
     formData.append("username", this.loginUser.username);
     formData.append("profileImage",  this.profileImage);
 
-    this.subscriptions.push(
+    this.subs.add(
       this.userService.updateProfileImage(formData).subscribe(
         (event: HttpEvent<any>) => {
           this.reportImageUploadProgress(event);
@@ -124,7 +130,7 @@ export class UserComponent implements OnInit, OnDestroy{
     // save the form data;
     const formData = this.userService.createUserFormData(null, userForm.value, this.profileImage);
     // makes an http call so we need to subscribe to it
-    this.subscriptions.push(
+    this.subs.add(
     this.userService.addUser(formData).subscribe(
      ( response: User) => {
       this.clickButtonById("new-user-close")
@@ -173,7 +179,7 @@ export class UserComponent implements OnInit, OnDestroy{
      // save the form data;
      const formData = this.userService.createUserFormData(this.currentUsername, this.editUser, this.profileImage);
      // makes an http call so we need to subscribe to it
-     this.subscriptions.push(
+     this.subs.add(
      this.userService.updateUser(formData).subscribe(
       ( response: User) => {
        this.clickButtonById("closeEditUserModalButton")
@@ -192,7 +198,7 @@ export class UserComponent implements OnInit, OnDestroy{
   public onResetPassword(emailForm: NgForm): void{
     this.refreshing = true;
     const emailAddress = emailForm.value['reset-password-email']
-    this.subscriptions.push(
+    this.subs.add(
       this.userService.resetPassword(emailAddress).subscribe(
         (response: CustomHttpResponse) =>{
           this.toastr.success(response.message);
@@ -208,7 +214,7 @@ export class UserComponent implements OnInit, OnDestroy{
   }
 
   public onDeleteUser(user: User): void{
-    this.subscriptions.push(
+    this.subs.add(
       this.userService.deleteUser(user.username).subscribe(
         (response: CustomHttpResponse) => {
           this.toastr.success(response.message);
@@ -231,7 +237,7 @@ export class UserComponent implements OnInit, OnDestroy{
      // save the form data;
      const formData = this.userService.createUserFormData(this.currentUsername, user, this.profileImage);
      // makes an http call so we need to subscribe to it
-     this.subscriptions.push(
+     this.subs.add(
      this.userService.updateUser(formData).subscribe(
       ( response: User) => {
        this.getUsers(false);
@@ -250,13 +256,30 @@ export class UserComponent implements OnInit, OnDestroy{
 
   }
 
+  // getter in typescript
+  public get isAdmin(): boolean{
+    return this.getUserRole() === Role.ADMIN || this.getUserRole() === Role.SUPER_ADMIN
+  }
+
+  public get isManager(): boolean{
+    return this.isAdmin || this.getUserRole() === Role.MANAGER
+  }
+
+  public get isAdminOrManager(): boolean{
+    return this.isAdmin || this.isManager
+  }
+
+  private getUserRole(): string {
+    return this.authenticationService.getUserFromLocalStorage().role
+  }
+
   private clickButtonById(buttonId: string): void {
     document.getElementById(buttonId).click()
   }
 
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subs.unsubscribe();
   }
 
 }

@@ -20,7 +20,8 @@
           <i class="fa fa-users "></i>
           Users
         </a>
-        <a class="nav-item nav-link ml-3 nav-icon" (click)="changeTitle('Settings')" href="#reset-password"
+        <!-- usage of getter here  -->
+        <a [hidden]="!isAdmin" class="nav-item nav-link ml-3 nav-icon" (click)="changeTitle('Settings')" href="#reset-password"
           data-toggle="tab">
           <i class="fa fa-cogs"></i>
           Settings
@@ -45,7 +46,7 @@
             <input name="searchName" #searchInput="ngModel" class="form-control mr-sm-2" ngModel type="search"
               (ngModelChange)="searchUsers(searchForm.value.searchName)" placeholder="Search users...">
           </form>
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">
+          <button  [hidden]="!isAdminOrManager" type="button" class="btn btn-primary " data-toggle="modal" data-target="#addUserModal">
             <i class="fa fa-user-plus "> User</i>
           </button>
         </div>
@@ -66,7 +67,7 @@
             <th>Username</th>
             <th>Email</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th [hidden]="!isAdminOrManager">Actions</th>
           </tr>
         </thead>
         <tbody *ngFor="let appUser of users">
@@ -84,14 +85,28 @@
               <span class="badge bg-success m-1" [hidden]="!appUser?.active">Active</span>
               <span class="badge bg-danger" [hidden]="appUser?.active">Inactive</span>
             </td>
-            <td class="">
+            <!-- <td [hidden]="!isAdminOrManager" class="">
               <div class="btn-group">
-                <button class="btn btn-outline-success" (click)="onEditUser(appUser)"><i
-                    class="fas fa-edit "></i></button>
-                <button class="btn btn-outline-danger" (click)="onDeleteUser(appUser)"><i
-                    class="fas fa-trash"></i></button>
+                <button  [hidden]="!isAdminOrManager" class="btn btn-outline-success" (click)="onEditUser(appUser)">
+                    <i class="fas fa-edit "></i>
+                </button>
+                <button [hidden]="!isAdmin" class="btn btn-outline-danger" (click)="onDeleteUser(appUser)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td> -->
+
+            <td  [hidden]="!isAdminOrManager"   class="">
+              <div class="btn-group">
+                <button  class="btn btn-outline-success" (click)="onEditUser(appUser)">
+                    <i class="fas fa-edit "></i>
+                </button>
+                <button [hidden]="!isAdmin" class="btn btn-outline-danger" (click)="onDeleteUser(appUser)">
+                  <i class="fas fa-trash"></i>
+                </button>
               </div>
             </td>
+
           </tr>
         </tbody>
       </table>
@@ -104,7 +119,7 @@
     <button [hidden]="true" type="button" id="openUserEdit" data-toggle="modal" data-target="#editUserModal"> </button>
 
     <!-- CHANGE PASSWORD OR RESET -->
-    <div class="tab-pane fade" id="reset-password">
+    <div [hidden]="!isAdmin" class="tab-pane fade" id="reset-password">
       <form #resetPasswordForm="ngForm" (ngSubmit)="onResetPassword(resetPasswordForm)">
         <fieldset>
           <legend>User Password Management</legend>
@@ -161,7 +176,7 @@
                         </div>
                         <!-- LOGGIN DATE DISPLAY -->
                         <div class="text-muted" *ngIf="selectedUser?.lastLoginDate"><small>Last Login:
-                            {{selectedUser?.lastLoginDate}}</small>
+                            {{selectedUser?.lastLoginDate.toString().substring(0,10)}}</small>
                         </div>
                       </div>
                       <div class="text-center text-sm-right">
@@ -303,7 +318,7 @@
                                   <div class="col mb-3">
                                     <div class="form-group">
                                       <label>Role </label><small>(read only)</small>
-                                      <select name="role" required class="form-control" [(ngModel)]="loginUser.role" >
+                                      <select disabled="!isAdmin" name="role" required class="form-control" [(ngModel)]="loginUser.role" >
                                         <option value="ROLE_USER">USER</option>
                                         <option value="ROLE_HR">HR</option>
                                         <option value="ROLE_MANAGER">MANAGER</option>
@@ -375,7 +390,7 @@
     </div>
 
     <!-- ================    ADD USER MODAL  =============== -->
-    <div class="modal draggable fade bd-example-modal-lg" id="addUserModal" tabindex="-1" role="dialog"
+    <div [hidden]="!isAdminOrManager" class="modal draggable fade bd-example-modal-lg" id="addUserModal" tabindex="-1" role="dialog"
       aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -404,7 +419,9 @@
                   <label for="email">Email</label>
                   <input type="email" name="email" required ngModel class="form-control">
                 </div>
-                <div class="form-group">
+
+              <!-- AONLY ADMINS CAN ADD ALL TYPES OF USER ROLES -->
+                <div *ngIf="isAdmin" class="form-group">
                   <label for="authority">Role</label>
                   <select name="role" required ngModel="ROLE_USER" class="form-control">
                     <option value="ROLE_USER">USER</option>
@@ -415,40 +432,33 @@
                   </select>
                 </div>
 
-                <div class="input-group">
+                <!-- MANAGERS CAN ONLY ADD ONYL ONE ROLE THATS THE USER  -->
+                <div *ngIf="!isAdmin" class="form-group">
+                  <div class="form-group">
+                    <label for="role">Role</label>
+                    <input type="text" name="role" required readonly ngModel = "USER" class="form-control">
+                  </div>
+                </div>
 
+                <div class="input-group">
                   <div class="custom-file">
                     <div class="input-group  file-input">
                       <input type="file" class="form-control" (change)="onProfileImageChange($event)"
                         aria-describedby="inputGroupFileAddon04" accept="image/jpg" name="profileImage"
                         aria-label="Upload" />
                     </div>
-
-                    <!-- <input type="file" accept="image/*" name="profileImage"
-                    (change)="onProfileImageChange($event)"
-                      class="custom-file-input"> -->
-                    <!-- <label class="custom-file-label" >
-                      <i class="fa fa-upload"></i>
-                      <span [hidden]="!fileName">Choose File</span>
-                      <span [hidden]="!fileName">{{fileName}}</span>
-                    </label>
-                    <label class="custom-file-label" [hidden]="fileName">
-                      <span [hidden]="!fileName">Choose File</span>
-                      <span >{{ fileName }}</span>
-                    </label> -->
                   </div>
                 </div>
+
                 <fieldset class="form-group">
                   <div class="form-check">
                     <label class="form-check-label">
-                      <input type="checkbox" name="active" ngModel class="form-check-input">
-                      Acitve
+                      <input type="checkbox" name="active" ngModel class="form-check-input"> Acitve
                     </label>
                   </div>
                   <div class="form-check disabled">
                     <label class="form-check-label">
-                      <input type="checkbox" name="notLocked" ngModel class="form-check-input">
-                      Unlocked
+                      <input type="checkbox" name="notLocked" ngModel class="form-check-input"> Unlocked
                     </label>
                   </div>
                 </fieldset>
@@ -456,10 +466,10 @@
               </form>
             </div>
           </div>
+
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal" id="new-user-close">Close</button>
-            <button type="button" (click)="saveNewUser()" [disabled]="newUserForm.invalid" class="btn btn-primary">Save
-              changes</button>
+            <button type="button" (click)="saveNewUser()" [disabled]="newUserForm.invalid" class="btn btn-primary">Add User</button>
           </div>
         </div>
       </div>
@@ -471,9 +481,9 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-center">Edit {{editUser?.firstName}} {{editUser?.lastName}}<small>
-                (read only)
-              </small></h5>
+            <h5 class="modal-title text-center">Edit {{editUser?.firstName}} {{editUser?.lastName}}
+              <small [hidden]="isAdminOrManager">(read only) </small>
+            </h5>
             <button type="button" class="close modal-btn" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -483,23 +493,23 @@
               <form #editUserForm="ngForm">
                 <div class="form-group">
                   <label for="firstName">First Name</label>
-                  <input [(ngModel)]="editUser.firstName" type="text" name="firstName" required class="form-control">
+                  <input [disabled]="!isAdminOrManager" [(ngModel)]="editUser.firstName" type="text" name="firstName" required class="form-control">
                 </div>
                 <div class="form-group">
                   <label for="lastName">Last Name</label>
-                  <input [(ngModel)]="editUser.lastName" type="text" name="lastName" required class="form-control">
+                  <input [disabled]="!isAdminOrManager"[(ngModel)]="editUser.lastName" type="text" name="lastName" required class="form-control">
                 </div>
                 <div class="form-group">
                   <label for="username">Username</label>
-                  <input [(ngModel)]="editUser.username" type="text" name="username" required class="form-control">
+                  <input [disabled]="!isAdminOrManager"  [(ngModel)]="editUser.username" type="text" name="username" required class="form-control">
                 </div>
                 <div class="form-group">
                   <label for="email">Email</label>
-                  <input [(ngModel)]="editUser.email" type="email" name="email" required class="form-control">
+                  <input [disabled]="!isAdminOrManager"  [(ngModel)]="editUser.email" type="email" name="email" required class="form-control">
                 </div>
                 <div class="form-group">
-                  <label for="authority">Role <small>(read only)</small></label>
-                  <select [(ngModel)]="editUser.role" name="role" required class="form-control">
+                  <label for="authority">Role <small [hidden]="isAdmin" >(read only)</small></label>
+                  <select [disabled]="!isAdmin" [(ngModel)]="editUser.role" name="role" required class="form-control">
                     <option value="ROLE_USER">USER</option>
                     <option value="ROLE_HR">HR</option>
                     <option value="ROLE_MANAGER">MANAGER</option>
@@ -510,8 +520,11 @@
 
                 <div class="input-group mb-2">
                   <div class="input-group  file-input">
-                    <input type="file" class="form-control" (change)="onProfileImageChange($event)"
+                    <!-- <input [disabled]="!isAdminOrManager"  type="file" class="form-control" (change)="onProfileImageChange($event)"
                       aria-describedby="inputGroupFileAddon04" accept="image/jpg" name="profileImage"
+                      aria-label="Upload" /> -->
+                      <input [disabled]="!isAdminOrManager"  type="file" class="form-control" (change)="onProfileImageChange($event)"
+                      aria-describedby="inputGroupFileAddon04" accept="image/*" name="profileImage"
                       aria-label="Upload" />
                     <label for="custom-file-label">
                       <span [hidden]="!fileName"> {{fileName}}</span>
@@ -523,14 +536,14 @@
                 <fieldset class="form-group">
                   <div class="form-check">
                     <label class="form-check-label">
-                      <input name="active" type="checkbox" [(ngModel)]="editUser.active" class="form-check-input">
-                      Acitve <small>(read only)</small>
+                      <input [disabled]="!isManager"  name="active" type="checkbox" [(ngModel)]="editUser.active" class="form-check-input">
+                      Acitve <small [hidden]="isManager" >(read only)</small>
                     </label>
                   </div>
                   <div class="form-check disabled">
                     <label class="form-check-label">
-                      <input [(ngModel)]="editUser.notLocked" name="locked" type="checkbox" class="form-check-input">
-                      Unlocked <small>(read only)</small>
+                      <input [disabled]="!isManager" [(ngModel)]="editUser.notLocked" name="locked" type="checkbox" class="form-check-input">
+                      Unlocked <small [hidden]="isManager">(read only)</small>
                     </label>
                   </div>
                 </fieldset>
@@ -542,8 +555,8 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal"
               id="closeEditUserModalButton">Close</button>
-            <button type="button" (click)="onUpdateUser()" [disabled]="editUserForm.invalid"
-              class="btn btn-primary">Save changes</button>
+            <button type="button" (click)="onUpdateUser()" [disabled]="editUserForm.invalid || !isAdminOrManager"
+              class="btn btn-primary">Update User</button>
           </div>
 
         </div>
